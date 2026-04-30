@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nested legend without a config file</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --accent: #6366f1;
+            --accent-dim: rgba(99, 102, 241, 0.10);
+            --accent-border: rgba(99, 102, 241, 0.25);
+
+            --pane-bg: rgba(255, 255, 255, 0.82);
+            --pane-bg-opaque: #FFFFFF;
+            --pane-shine: transparent;
+            --bg-secondary: #F0F2F4;
+            --card: rgba(255, 255, 255, 0.6);
+            --card-hover: rgba(0, 0, 0, 0.03);
+            --border: rgba(0, 0, 0, 0.08);
+            --border-strong: rgba(0, 0, 0, 0.12);
+            --text: #16191D;
+            --text-secondary: #586274;
+            --text-muted: #8892A5;
+            --focus: rgba(243, 63, 117, 0.4);
+
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+
+            --pane-shadow:
+                0 0 0 1px rgba(0, 0, 0, 0.04),
+                0 0 1px rgba(24, 39, 75, 0.12),
+                0 2px 4px rgba(24, 39, 75, 0.06),
+                0 4px 8px rgba(24, 39, 75, 0.06),
+                0 8px 24px rgba(24, 39, 75, 0.08);
+            --shadow-sm: 0 0 1px rgba(24, 39, 75, 0.18);
+            --shadow-md: 0 0 1px rgba(24, 39, 75, 0.12), 0 2px 4px rgba(24, 39, 75, 0.06);
+
+            --skeleton-from: rgba(0, 0, 0, 0.04);
+            --skeleton-to: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            --pane-bg: rgba(17, 17, 17, 0.85);
+            --pane-bg-opaque: #111111;
+            --pane-shine: rgba(255, 255, 255, 0.06);
+            --bg-secondary: rgba(255, 255, 255, 0.04);
+            --card: rgba(255, 255, 255, 0.04);
+            --card-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.38);
+            --focus: rgba(243, 63, 117, 0.5);
+
+            --pane-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.06),
+                0 0 1px rgba(0, 0, 0, 0.5),
+                0 4px 8px rgba(0, 0, 0, 0.25),
+                0 12px 32px rgba(0, 0, 0, 0.3);
+            --shadow-sm: 0 0 1px rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 0 1px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+
+            --skeleton-from: rgba(255, 255, 255, 0.04);
+            --skeleton-to: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 13px; line-height: 1.5;
+            height: 100vh; overflow: hidden;
+            background: #000; color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #map { position: absolute; inset: 0; z-index: 0; }
+
+        .pane {
+            position: absolute; top: 16px; right: 16px; bottom: 16px;
+            width: 380px; max-width: calc(100vw - 32px); z-index: 10;
+            display: flex; flex-direction: column;
+            background: var(--pane-bg);
+            -webkit-backdrop-filter: blur(12px) saturate(1.4);
+            backdrop-filter: blur(12px) saturate(1.4);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--pane-shadow);
+            border: 1px solid var(--pane-shine);
+            overflow: hidden;
+        }
+        .pane-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
+        .pane-scroll::-webkit-scrollbar { width: 5px; }
+        .pane-scroll::-webkit-scrollbar-track { background: transparent; }
+        .pane-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+        .header { padding: 20px 16px 16px; flex-shrink: 0; }
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .header h1 { font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.35; letter-spacing: -0.01em; }
+        .header .meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 400; }
+        .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 8px; font-size: 11px; font-weight: 600;
+            color: var(--accent); background: var(--accent-dim);
+            border-radius: 100px; letter-spacing: 0.01em; white-space: nowrap;
+        }
+        .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+        .icon-btn {
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            border: none; border-radius: var(--radius-sm); background: transparent;
+            color: var(--text-muted); cursor: pointer; transition: background 0.12s, color 0.12s;
+        }
+        .icon-btn:hover { background: var(--card-hover); color: var(--text-secondary); }
+        .icon-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--focus); }
+        .icon-btn svg { width: 15px; height: 15px; }
+
+        .layer-select-wrap { margin-top: 12px; }
+        .layer-select-wrap select {
+            width: 100%; padding: 6px 28px 6px 10px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); color: var(--text);
+            font: 500 12px/1.4 'Inter', sans-serif; cursor: pointer; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%238892A5' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 10px center;
+            transition: border-color 0.12s;
+        }
+        .layer-select-wrap select:focus { outline: none; border-color: var(--accent); }
+
+        .divider { height: 1px; background: var(--border); margin: 0 16px; flex-shrink: 0; }
+        .content { padding: 16px; }
+        .section { margin-bottom: 20px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; overflow: hidden; }
+        .section-title {
+            font-size: 11px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px;
+        }
+        .section-header .section-title { margin-bottom: 0; }
+        .section-header .section-select { max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .empty-state { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 13px; }
+
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skeleton {
+            border-color: transparent;
+            background: linear-gradient(90deg, var(--skeleton-from) 25%, var(--skeleton-to) 50%, var(--skeleton-from) 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── stat-cards ── */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .stat-card {
+            padding: 12px;
+            border-radius: var(--radius-md);
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: background 0.12s;
+        }
+        .stat-card:hover { background: var(--card-hover); }
+        .stat-card.skeleton { min-height: 68px; }
+        .stat-value {
+            font-size: 18px; font-weight: 600; color: var(--text); line-height: 1.25;
+            font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+        }
+        .stat-label {
+            font-size: 11px; font-weight: 500; color: var(--text-muted);
+            margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+
+        /* ── attribute-picker ── */
+        .section-select {
+            padding: 3px 22px 3px 8px;
+            font: 500 11px/1.4 'Inter', sans-serif;
+            color: var(--text-secondary);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            appearance: none;
+            cursor: pointer;
+            max-width: 50%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='%238892A5' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            transition: border-color 0.12s;
+        }
+        .section-select:focus { outline: none; border-color: var(--accent); }
+
+        /* ── bar-chart ── */
+        .bar-chart { display: flex; flex-direction: column; gap: 6px; }
+        .bar-row {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 12px; cursor: pointer;
+            border-radius: var(--radius-sm); padding: 2px 0;
+            transition: background 0.1s;
+        }
+        .bar-row:hover { background: var(--card-hover); }
+        .bar-row.dimmed { opacity: 0.35; }
+        .bar-row.locked .bar-fill { box-shadow: inset 0 0 0 2px var(--accent); }
+        .bar-row.locked .bar-label { color: var(--text); font-weight: 600; }
+        .bar-label {
+            min-width: 80px; max-width: 100px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: var(--text-secondary); font-weight: 500;
+        }
+        .bar-track { flex: 1; height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .bar-value {
+            min-width: 40px; text-align: right;
+            color: var(--text-muted); font-size: 11px; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── histogram ── */
+        .histogram-wrap { position: relative; }
+        .histogram { display: flex; gap: 2px; align-items: flex-end; height: 64px; }
+        .hist-bar {
+            flex: 1; border-radius: 2px 2px 0 0;
+            cursor: pointer; opacity: 0.7; transition: opacity 0.12s;
+        }
+        .hist-bar:hover { opacity: 1; }
+        .hist-bar.locked { opacity: 1; box-shadow: inset 0 0 0 2px var(--accent); }
+        .hist-labels {
+            display: flex; justify-content: space-between;
+            margin-top: 4px; font-size: 11px;
+            color: var(--text-muted); font-variant-numeric: tabular-nums;
+        }
+        .hist-tooltip {
+            position: absolute; top: -6px; left: 50%;
+            transform: translate(-50%, -100%);
+            padding: 5px 9px; border-radius: var(--radius-sm);
+            background: var(--text); color: var(--pane-bg-opaque);
+            font-size: 11px; font-weight: 500; white-space: nowrap;
+            pointer-events: none; opacity: 0; transition: opacity 0.12s;
+            z-index: 5; font-variant-numeric: tabular-nums;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+        .hist-tooltip::after {
+            content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            border: 4px solid transparent; border-top-color: var(--text);
+        }
+        .hist-tooltip.visible { opacity: 1; }
+        .hist-filter-hint {
+            font-size: 10px; color: var(--text-muted); text-align: center;
+            margin-top: 2px; opacity: 0; transition: opacity 0.15s;
+        }
+        .hist-filter-hint.visible { opacity: 1; }
+
+        /* ── nested-legend ── */
+        .legend-tree { display: flex; flex-direction: column; gap: 1px; }
+        .legend-item { display: flex; flex-direction: column; }
+        .legend-item-header {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; padding: 4px 6px;
+            border-radius: var(--radius-sm); user-select: none;
+            transition: background 0.1s;
+        }
+        .legend-item-header:hover { background: var(--card-hover); }
+        .legend-item-header input[type="checkbox"] {
+            accent-color: var(--accent); cursor: pointer;
+        }
+        .legend-group-label {
+            font-size: 12px; font-weight: 600;
+            color: var(--text); letter-spacing: -0.005em;
+        }
+        .legend-layer-label {
+            font-size: 12px; font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .legend-label--off {
+            color: var(--text-muted);
+            text-decoration: line-through;
+            text-decoration-color: var(--text-muted);
+        }
+        .legend-children {
+            padding-left: 20px;
+            border-left: 1px solid var(--border);
+            margin-left: 9px;
+            margin-top: 1px;
+        }
+        .legend-leaf-swatch {
+            width: 10px; height: 10px;
+            border-radius: 2px; flex-shrink: 0;
+        }
+
+        /* ── swatch legend (color decoder) ── */
+        .legend-section { margin-bottom: 12px; }
+        .legend-section-title {
+            font-size: 11px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+        .legend-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .legend-row .legend-item {
+            display: flex; flex-direction: row; align-items: center; gap: 5px;
+            cursor: pointer; padding: 2px 4px;
+            border-radius: var(--radius-sm); transition: opacity 0.15s;
+        }
+        .legend-row .legend-item:hover { background: var(--card-hover); }
+        .legend-row .legend-item.hidden { opacity: 0.35; }
+        .legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+        .legend-row .legend-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+
+        /* ── detail-panel ── */
+        .detail-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden; margin-top: 8px;
+            animation: fadeIn 0.15s ease;
+        }
+        .detail-header {
+            padding: 10px 12px;
+            background: var(--accent-dim);
+            border-bottom: 1px solid var(--border);
+            font-size: 12px; font-weight: 600; color: var(--text);
+        }
+        .detail-rows { padding: 2px 0; }
+        .detail-row {
+            display: flex; justify-content: space-between;
+            padding: 7px 12px; font-size: 12px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-key { color: var(--text-muted); font-weight: 500; flex-shrink: 0; }
+        .detail-val {
+            color: var(--text); font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            text-align: right; word-break: break-word;
+        }
+
+        /* ── fit-to-data button ── */
+        .control-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 10px; font-size: 11px; font-weight: 600;
+            color: var(--text-secondary); background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm); cursor: pointer;
+            transition: background 0.12s, border-color 0.12s, color 0.12s;
+        }
+        .control-btn:hover { background: var(--card-hover); color: var(--text); border-color: var(--border-strong); }
+
+        @media (max-width: 768px) {
+            .pane { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-width: 100%; height: 50vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+            #map { bottom: 50vh; }
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="pane" id="pane">
+    <div class="header">
+        <div class="header-row">
+            <div>
+                <h1 id="title">Loading&hellip;</h1>
+                <div class="meta" id="subtitle"></div>
+            </div>
+            <div class="header-actions">
+                <span class="badge" id="feature-count" style="display:none">
+                    <span id="count-label">--</span>
+                </span>
+                <button class="icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle light/dark theme">
+                    <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="display:none">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+                    </svg>
+                    <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="layer-select-wrap" id="layer-selector" style="display:none">
+            <select id="layer-select"></select>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="pane-scroll">
+        <div class="content" id="content">
+            <!-- Stat cards -->
+            <div class="stat-grid" id="stats">
+                <div class="stat-card skeleton"></div>
+                <div class="stat-card skeleton"></div>
+                <div class="stat-card skeleton"></div>
+                <div class="stat-card skeleton"></div>
+            </div>
+
+            <!-- Bar chart -->
+            <div class="section" id="bar-section" style="display:none">
+                <div class="section-header">
+                    <div class="section-title" id="bar-title">By Category</div>
+                    <select class="section-select" id="bar-attr-select"></select>
+                </div>
+                <div class="bar-chart" id="bar-chart"></div>
+            </div>
+
+            <!-- Histogram -->
+            <div class="section" id="hist-section" style="display:none">
+                <div class="section-header">
+                    <div class="section-title" id="hist-title">Distribution</div>
+                    <select class="section-select" id="hist-attr-select"></select>
+                </div>
+                <div class="histogram-wrap">
+                    <div class="hist-tooltip" id="hist-tooltip"></div>
+                    <div class="histogram" id="histogram"></div>
+                </div>
+                <div class="hist-labels" id="hist-labels"></div>
+                <div class="hist-filter-hint" id="hist-filter-hint">Filtering map to this range</div>
+            </div>
+
+            <!-- Fit to data -->
+            <div class="section">
+                <button class="control-btn" id="fit-btn" title="Fit to data">Fit to Data</button>
+            </div>
+
+            <!-- Nested legend (folder tree of all 11 layers) -->
+            <div class="section" id="nested-legend-section">
+                <div class="section-title">Layers</div>
+                <div class="legend-tree" id="legend-tree"></div>
+            </div>
+
+            <!-- Swatch legend (color decoder for active layer) -->
+            <div class="section" id="legend-section">
+                <div class="section-title">Legend</div>
+                <div id="legend-container"></div>
+            </div>
+
+            <!-- Detail panel -->
+            <div id="detail-panel"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { Felt } from "https://esm.sh/@feltmaps/js-sdk@1.10.0";
+
+    const CONFIG = {
+        mapId: "C1Gk6j8VSfyuqiphAw5A3D",
+        feltApiToken: null,
+        theme: "light",   // basemap = "default" -> light theme
+        title: null,
+    };
+
+    // Power Plants is primary (richest schema). GHG Emissions is secondary.
+    const DATA_LAYER_IDS = [
+        "dsG4ahnVQ9AO45tWNMfxJQC",   // Industrial / Global Power Plant Database (primary)
+        "efruuFGiTFqIRvJ3WT82pC",    // Industrial / Large Facility Greenhouse Gas Emissions (secondary)
+    ];
+
+    let felt, allLayers, activeLayerId, nameMap = {};
+    let currentPaintColors = null;
+    let currentMapStyledAttr = null;
+    let currentMapCatColorMap = {};
+
+    // ── Color utilities ──
+
+    const _colorCanvas = document.createElement('canvas').getContext('2d');
+    function colorToHex(c) {
+        if (!c || typeof c !== 'string') return null;
+        try {
+            _colorCanvas.fillStyle = '#000';
+            _colorCanvas.fillStyle = c;
+            const result = _colorCanvas.fillStyle;
+            if (result.startsWith('#')) return result;
+            const m = result.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (!m) return null;
+            const hex = (n) => Number(n).toString(16).padStart(2, '0');
+            return `#${hex(m[1])}${hex(m[2])}${hex(m[3])}`;
+        } catch { return null; }
+    }
+
+    function normalizePaintColors(paintColor) {
+        if (!paintColor) return [];
+        if (Array.isArray(paintColor)) return paintColor.map(colorToHex).filter(Boolean);
+        const single = colorToHex(paintColor);
+        return single ? [single] : [];
+    }
+
+    function hexToHSL(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        const r = parseInt(hex.substring(0, 2), 16) / 255;
+        const g = parseInt(hex.substring(2, 4), 16) / 255;
+        const b = parseInt(hex.substring(4, 6), 16) / 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        if (max === min) { h = s = 0; }
+        else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                case g: h = ((b - r) / d + 2) / 6; break;
+                case b: h = ((r - g) / d + 4) / 6; break;
+            }
+        }
+        return { h: h * 360, s, l };
+    }
+
+    function luminance(hex) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16) / 255;
+        const g = parseInt(hex.substring(2, 4), 16) / 255;
+        const b = parseInt(hex.substring(4, 6), 16) / 255;
+        const toLinear = c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+    }
+
+    function contrastRatio(hex1, hex2) {
+        const l1 = luminance(hex1), l2 = luminance(hex2);
+        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
+    function darkenHex(hex, amount) {
+        hex = hex.replace('#', '');
+        const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - amount);
+        const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - amount);
+        const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - amount);
+        return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+    }
+
+    function lerpColor(colors, t) {
+        if (!colors || colors.length < 2) return colors?.[0] || '#6366f1';
+        const i = Math.min(Math.floor(t * (colors.length - 1)), colors.length - 2);
+        const f = t * (colors.length - 1) - i;
+        const parse = c => [parseInt(c.slice(1,3),16), parseInt(c.slice(3,5),16), parseInt(c.slice(5,7),16)];
+        const [r1,g1,b1] = parse(colors[i]), [r2,g2,b2] = parse(colors[i + 1]);
+        const hex = v => Math.round(v).toString(16).padStart(2,'0');
+        return `#${hex(r1+f*(r2-r1))}${hex(g1+f*(g2-g1))}${hex(b1+f*(b2-b1))}`;
+    }
+
+    function formatValue(val) {
+        if (val == null) return '—';
+        if (typeof val === 'number') return val.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        return String(val);
+    }
+
+    // ── Theme engine ──
+
+    function deriveTheme(accentHex, isDark) {
+        const root = document.documentElement;
+        const vars = ['--pane-bg','--pane-bg-opaque','--pane-shine','--bg-secondary',
+            '--card','--card-hover','--border','--border-strong',
+            '--text','--text-secondary','--text-muted',
+            '--skeleton-from','--skeleton-to','--pane-shadow','--shadow-sm','--shadow-md'];
+        vars.forEach(v => root.style.removeProperty(v));
+
+        if (isDark) root.setAttribute('data-theme', 'dark');
+        else root.removeAttribute('data-theme');
+
+        if (!accentHex) return;
+
+        let accent = accentHex;
+        if (!isDark) {
+            while (contrastRatio(accent, '#FFFFFF') < 3 && accent !== '#000000') {
+                accent = darkenHex(accent, 20);
+            }
+        }
+
+        root.style.setProperty('--accent', accent);
+        const hc = accent.replace('#', '');
+        const r = parseInt(hc.substring(0, 2), 16);
+        const g = parseInt(hc.substring(2, 4), 16);
+        const b = parseInt(hc.substring(4, 6), 16);
+        root.style.setProperty('--accent-dim', `rgba(${r},${g},${b},${isDark ? 0.14 : 0.08})`);
+        root.style.setProperty('--accent-border', `rgba(${r},${g},${b},${isDark ? 0.28 : 0.20})`);
+
+        if (!isDark) {
+            const { h } = hexToHSL(accentHex);
+            const isWarm = (h >= 0 && h <= 60) || h >= 300;
+            if (isWarm) {
+                root.style.setProperty('--pane-bg', 'rgba(255, 252, 247, 0.85)');
+                root.style.setProperty('--bg-secondary', 'rgba(254, 247, 237, 0.5)');
+                root.style.setProperty('--card', 'rgba(255, 253, 250, 0.5)');
+            }
+        }
+    }
+
+    function initThemeToggle() {
+        const btn = document.getElementById('theme-toggle');
+        const iconSun = document.getElementById('icon-sun');
+        const iconMoon = document.getElementById('icon-moon');
+        function update() {
+            const isDark = document.documentElement.hasAttribute('data-theme');
+            iconSun.style.display = isDark ? 'block' : 'none';
+            iconMoon.style.display = isDark ? 'none' : 'block';
+        }
+        btn.addEventListener('click', () => {
+            const isDark = document.documentElement.hasAttribute('data-theme');
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+            deriveTheme(accent || '#6366f1', !isDark);
+            update();
+        });
+        update();
+    }
+
+    // ── Schema helpers ──
+
+    function classifyAttrs(schema) {
+        const numeric = [], category = [], datetime = [], text = [];
+        const epochRe = /^(time|timestamp|updated|created|date|epoch|unix|_at|_ts)$/i;
+        for (const a of schema.attributes) {
+            const t = (a.type || '').toLowerCase();
+            if (['number','numeric','float','integer','double'].includes(t)) {
+                if (!epochRe.test(a.id) && !a.id.endsWith('_at') && !a.id.endsWith('_ts')) numeric.push(a);
+            }
+            else if (t === 'datetime' || t === 'date') datetime.push(a);
+            else if (t === 'string' || t === 'text') { category.push(a); text.push(a); }
+        }
+        return { numeric, category, datetime, text };
+    }
+
+    // ── Block: stat-cards ──
+
+    async function loadStatCards(layerId, options = {}) {
+        const el = document.getElementById("stats");
+        const { numericAttrs = [] } = options;
+
+        try {
+            const calls = [
+                felt.getAggregates({ layerId, aggregation: { methods: ["count"] } })
+            ];
+            for (const attr of numericAttrs.slice(0, 3)) {
+                calls.push(
+                    felt.getAggregates({ layerId, aggregation: { methods: ["avg", "max"], attribute: attr.id } })
+                );
+            }
+
+            const results = await Promise.allSettled(calls);
+            const countResult = results[0].status === "fulfilled" ? results[0].value : {};
+
+            const cards = [{ label: "Total Features", value: countResult.count != null ? countResult.count.toLocaleString() : "—" }];
+            for (let i = 0; i < numericAttrs.slice(0, 3).length; i++) {
+                const r = results[i + 1]?.status === "fulfilled" ? results[i + 1].value : {};
+                const name = numericAttrs[i].displayName;
+                if (i === 0 && r.max != null) {
+                    cards.push({ label: `Max ${name}`, value: r.max.toLocaleString(undefined, { maximumFractionDigits: 1 }) });
+                }
+                if (r.avg != null) {
+                    cards.push({ label: `Avg ${name}`, value: r.avg.toLocaleString(undefined, { maximumFractionDigits: 1 }) });
+                }
+            }
+
+            el.innerHTML = cards.slice(0, 4).map(s =>
+                `<div class="stat-card">
+                    <div class="stat-value">${s.value}</div>
+                    <div class="stat-label">${s.label}</div>
+                </div>`
+            ).join("");
+
+            return countResult.count;
+        } catch (e) {
+            el.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Could not load statistics</div>`;
+            return null;
+        }
+    }
+
+    // ── Block: bar-chart ──
+
+    async function loadBarChart(layerId, options = {}) {
+        const { attrId, mapCatColorMap = {}, mapStyledAttr = null } = options;
+        const section = document.getElementById("bar-section");
+        const el = document.getElementById("bar-chart");
+
+        if (!attrId) { section.style.display = "none"; return false; }
+
+        const useMapColors = (attrId === mapStyledAttr) && Object.keys(mapCatColorMap).length > 0;
+
+        try {
+            const data = await felt.getCategoryData({ layerId, attribute: attrId });
+            if (!data || data.length === 0) { section.style.display = "none"; return false; }
+            const maxVal = Math.max(...data.map(c => c.value));
+            if (data.length > 30 || maxVal <= 1) { section.style.display = "none"; return false; }
+
+            section.style.display = "";
+            const displayName = nameMap[attrId] || attrId;
+            const titleEl = section.querySelector(".section-title");
+            if (titleEl) titleEl.textContent = `By ${displayName}`;
+
+            const max = Math.max(...data.map(c => c.value));
+            const sliced = data.slice(0, 8);
+
+            el.innerHTML = sliced.map(cat => {
+                const pct = (cat.value / max) * 100;
+                const color = useMapColors
+                    ? (mapCatColorMap[cat.key] || "var(--text-muted)")
+                    : "var(--accent)";
+                const opacity = useMapColors ? 1 : (0.45 + (pct / 180));
+                const safeKey = (cat.key || "").replace(/"/g, "&quot;");
+                return `<div class="bar-row" data-cat="${safeKey}">
+                    <div class="bar-label" title="${cat.key || "Unknown"}">${cat.key || "Unknown"}</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width:${pct}%;background:${color};opacity:${opacity};"></div>
+                    </div>
+                    <div class="bar-value">${cat.value.toLocaleString()}</div>
+                </div>`;
+            }).join("");
+
+            const rows = el.querySelectorAll(".bar-row");
+            let lockedKey = null;
+
+            const applyFilter = (key) => felt.setLayerFilters({ layerId, filters: [attrId, "eq", key] });
+            const clearFilter = () => felt.setLayerFilters({ layerId, filters: null });
+
+            rows.forEach(row => {
+                row.addEventListener("mouseenter", () => {
+                    rows.forEach(r => r.classList.toggle("dimmed", r !== row && r.dataset.cat !== lockedKey));
+                    applyFilter(row.dataset.cat);
+                });
+                row.addEventListener("mouseleave", () => {
+                    rows.forEach(r => r.classList.remove("dimmed"));
+                    if (lockedKey) applyFilter(lockedKey);
+                    else clearFilter();
+                });
+                row.addEventListener("click", () => {
+                    if (lockedKey === row.dataset.cat) {
+                        lockedKey = null;
+                        row.classList.remove("locked");
+                        clearFilter();
+                    } else {
+                        rows.forEach(r => r.classList.remove("locked"));
+                        lockedKey = row.dataset.cat;
+                        row.classList.add("locked");
+                        applyFilter(lockedKey);
+                    }
+                });
+            });
+
+            return true;
+        } catch (e) {
+            console.warn("Bar chart failed:", e);
+            section.style.display = "none";
+            return false;
+        }
+    }
+
+    // ── Block: histogram ──
+
+    async function loadHistogram(layerId, options = {}) {
+        const { attrId, paintColors = null, mapStyledAttr = null } = options;
+        const el = document.getElementById("histogram");
+        const section = document.getElementById("hist-section");
+        const labelsEl = document.getElementById("hist-labels");
+
+        if (!attrId) { section.style.display = "none"; return; }
+
+        const useMapColors = (attrId === mapStyledAttr) && paintColors?.length >= 2;
+
+        try {
+            const bins = await felt.getHistogramData({
+                layerId,
+                attribute: attrId,
+                steps: { type: "equal-intervals", count: 10 }
+            });
+            if (!bins || bins.length === 0) { section.style.display = "none"; return; }
+
+            section.style.display = "";
+            const displayName = nameMap[attrId] || attrId;
+            const titleEl = section.querySelector(".section-title");
+            if (titleEl) titleEl.textContent = `${displayName} Distribution`;
+            const max = Math.max(...bins.map(b => b.value));
+
+            el.innerHTML = bins.map((bin, i) => {
+                const pct = max > 0 ? (bin.value / max) * 100 : 0;
+                const t = bins.length > 1 ? i / (bins.length - 1) : 0;
+                const color = useMapColors ? lerpColor(paintColors, t) : "var(--accent)";
+                return `<div class="hist-bar" data-min="${bin.min}" data-max="${bin.max}" style="height:${Math.max(pct, 2)}%;background:${color};" title="${bin.min.toFixed(1)} – ${bin.max.toFixed(1)}: ${bin.value.toLocaleString()}"></div>`;
+            }).join("");
+
+            if (labelsEl) {
+                labelsEl.innerHTML = `<span>${bins[0].min.toFixed(1)}</span><span>${bins[bins.length - 1].max.toFixed(1)}</span>`;
+            }
+
+            const bars = el.querySelectorAll(".hist-bar");
+            const tooltip = section.querySelector(".hist-tooltip");
+            const hint = section.querySelector(".hist-filter-hint");
+            let lockedRange = null;
+
+            const applyFilter = (min, max) => felt.setLayerFilters({
+                layerId,
+                filters: [[attrId, "ge", min], "and", [attrId, "lt", max]]
+            });
+            const clearFilter = () => felt.setLayerFilters({ layerId, filters: null });
+
+            const showTooltip = (bar, min, max) => {
+                if (!tooltip) return;
+                const wrapRect = el.parentElement.getBoundingClientRect();
+                const barRect = bar.getBoundingClientRect();
+                tooltip.style.left = (barRect.left - wrapRect.left + barRect.width / 2) + 'px';
+                tooltip.textContent = `${min.toFixed(1)} - ${max.toFixed(1)}`;
+                tooltip.classList.add('visible');
+            };
+            const hideTooltip = () => { if (tooltip) tooltip.classList.remove('visible'); };
+
+            bars.forEach(bar => {
+                const min = parseFloat(bar.dataset.min);
+                const max = parseFloat(bar.dataset.max);
+                const isLocked = () => lockedRange && lockedRange.min === min && lockedRange.max === max;
+
+                bar.addEventListener("mouseenter", () => {
+                    bars.forEach(b => {
+                        const bMin = parseFloat(b.dataset.min);
+                        const isThisLocked = lockedRange && lockedRange.min === bMin;
+                        b.style.opacity = (b === bar || isThisLocked) ? "" : "0.3";
+                    });
+                    showTooltip(bar, min, max);
+                    if (hint) hint.classList.add('visible');
+                    applyFilter(min, max);
+                });
+
+                bar.addEventListener("mouseleave", () => {
+                    bars.forEach(b => b.style.opacity = "");
+                    hideTooltip();
+                    if (hint) hint.classList.remove('visible');
+                    if (lockedRange) applyFilter(lockedRange.min, lockedRange.max);
+                    else clearFilter();
+                });
+
+                bar.addEventListener("click", () => {
+                    if (isLocked()) {
+                        lockedRange = null;
+                        bar.classList.remove("locked");
+                        clearFilter();
+                    } else {
+                        bars.forEach(b => b.classList.remove("locked"));
+                        lockedRange = { min, max };
+                        bar.classList.add("locked");
+                        applyFilter(min, max);
+                    }
+                });
+            });
+        } catch (e) {
+            console.warn("Histogram failed:", e);
+            section.style.display = "none";
+        }
+    }
+
+    // ── Block: attribute-picker ──
+
+    function initAttributePicker(selectId, attributes, onAttrChange) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = attributes.map(a =>
+            `<option value="${a.id}">${a.displayName}</option>`
+        ).join("");
+        select.onchange = () => onAttrChange(select.value);
+    }
+
+    // ── Block: nested-legend ──
+
+    async function initNestedLegend(containerId) {
+        const container = document.getElementById(containerId);
+        const layers = await felt.getLayers();
+        const visibilityState = {};
+
+        function buildTree(layers) {
+            const root = { label: null, children: [] };
+            for (const layer of layers) {
+                const name = layer.name ?? layer.id;
+                const parts = name.split("/").map(s => s.trim());
+                let node = root;
+                parts.forEach((part, i) => {
+                    const isLeaf = i === parts.length - 1;
+                    if (isLeaf) {
+                        visibilityState[layer.id] = layer.visible !== false;
+                        node.children.push({
+                            label: part,
+                            layerId: layer.id,
+                            swatch: (() => {
+                                const colors = normalizePaintColors(layer.style?.paint?.color);
+                                return colors.length === 1 ? colors[0] : null;
+                            })()
+                        });
+                    } else {
+                        let group = node.children.find(c => c.children && c.label === part);
+                        if (!group) {
+                            group = { label: part, children: [] };
+                            node.children.push(group);
+                        }
+                        node = group;
+                    }
+                });
+            }
+            return root.children;
+        }
+
+        function descendantIds(item) {
+            if (item.layerId) return [item.layerId];
+            return (item.children || []).flatMap(descendantIds);
+        }
+        const allVisible = item => {
+            const ids = descendantIds(item);
+            return ids.length > 0 && ids.every(id => visibilityState[id]);
+        };
+        const someVisible = item => descendantIds(item).some(id => visibilityState[id]);
+
+        async function toggle(layerIds) {
+            const anyOn = layerIds.some(id => visibilityState[id]);
+            layerIds.forEach(id => { visibilityState[id] = !anyOn; });
+            await felt.setLayerVisibility(anyOn
+                ? { hide: layerIds, show: [] }
+                : { hide: [], show: layerIds });
+            redraw();
+        }
+
+        function buildItem(item, depth) {
+            const itemEl = document.createElement("div");
+            itemEl.className = `legend-item depth-${depth}`;
+
+            const header = document.createElement("div");
+            header.className = "legend-item-header";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = allVisible(item);
+            checkbox.indeterminate = !allVisible(item) && someVisible(item);
+
+            const ids = descendantIds(item);
+            const onToggle = () => toggle(ids);
+            checkbox.addEventListener("change", onToggle);
+
+            header.appendChild(checkbox);
+
+            if (item.swatch) {
+                const swatch = document.createElement("div");
+                swatch.className = "legend-leaf-swatch";
+                swatch.style.background = item.swatch;
+                header.appendChild(swatch);
+            }
+
+            const label = document.createElement("span");
+            const baseClass = item.children ? "legend-group-label" : "legend-layer-label";
+            const onClass = someVisible(item) ? "" : "legend-label--off";
+            label.className = `${baseClass} ${onClass}`;
+            label.textContent = item.label;
+            label.addEventListener("click", onToggle);
+
+            header.appendChild(label);
+            itemEl.appendChild(header);
+
+            if (item.children) {
+                const childContainer = document.createElement("div");
+                childContainer.className = "legend-children";
+                for (const child of item.children) {
+                    childContainer.appendChild(buildItem(child, depth + 1));
+                }
+                itemEl.appendChild(childContainer);
+            }
+            return itemEl;
+        }
+
+        let tree = buildTree(layers);
+
+        function redraw() {
+            container.innerHTML = "";
+            for (const item of tree) container.appendChild(buildItem(item, 0));
+        }
+
+        redraw();
+    }
+
+    // ── Block: swatch legend (color decoder) ──
+
+    async function loadLegend(containerId) {
+        const container = document.getElementById(containerId);
+        const layers = await felt.getLayers();
+        const visibleLayers = layers.filter(l => l.visible !== false && l.style?.paint?.color);
+
+        if (visibleLayers.length === 0) {
+            container.innerHTML = '<div class="legend-label">No styled layers</div>';
+            return;
+        }
+
+        let allLegendItems = [];
+        try { allLegendItems = await felt.getLegendItems(); } catch (e) {}
+
+        // Show legends only for layers with categorical/multi-color styling — single-color layers
+        // already have their swatch in the nested-legend tree, so this avoids duplication.
+        const richLayers = visibleLayers.filter(vl => {
+            const colors = normalizePaintColors(vl.style?.paint?.color);
+            return colors.length >= 2;
+        });
+
+        if (richLayers.length === 0) {
+            document.getElementById("legend-section").style.display = "none";
+            return;
+        }
+        document.getElementById("legend-section").style.display = "";
+
+        container.innerHTML = richLayers.map(vl => {
+            const colors = normalizePaintColors(vl.style?.paint?.color);
+            const labels = vl.style?.legend?.displayName || {};
+            const cfgCategories = vl.style?.config?.categories;
+            const categoriesArr = Array.isArray(cfgCategories) ? cfgCategories : [];
+            const title = vl.name || vl.style?.config?.categoricalAttribute || vl.style?.config?.numericAttribute || "Legend";
+            const layerLegendItems = allLegendItems.filter(li => li.layerId === vl.id);
+
+            return `<div class="legend-section">
+                <div class="legend-section-title">${title}</div>
+                <div class="legend-row">
+                    ${colors.map((c, i) => {
+                        const label = labels[String(i)] || categoriesArr[i] || layerLegendItems[i]?.label || "";
+                        const legendItemId = layerLegendItems[i]?.id || "";
+                        return `<div class="legend-item" data-layer-id="${vl.id}" data-legend-id="${legendItemId}">
+                            <div class="legend-swatch" style="background:${c}"></div>
+                            <div class="legend-label">${label}</div>
+                        </div>`;
+                    }).join("")}
+                </div>
+            </div>`;
+        }).join("");
+
+        container.querySelectorAll(".legend-item").forEach(item => {
+            item.addEventListener("click", async () => {
+                const legendId = item.dataset.legendId;
+                const layerIdVal = item.dataset.layerId;
+                if (!legendId) return;
+
+                const isHidden = item.classList.toggle("hidden");
+                const payload = isHidden
+                    ? { hide: [{ layerId: layerIdVal, id: legendId }] }
+                    : { show: [{ layerId: layerIdVal, id: legendId }] };
+                try { await felt.setLegendItemVisibility(payload); } catch (e) { console.warn("Toggle failed:", e); }
+            });
+        });
+    }
+
+    // ── Block: detail-panel + click-to-detail ──
+
+    function renderDetailPanel(containerId, properties, options = {}) {
+        const { title = "Feature Details" } = options;
+        const panel = document.getElementById(containerId);
+
+        let rows = "";
+        for (const [key, value] of Object.entries(properties)) {
+            const label = nameMap[key] || key;
+            let display;
+            if (value == null || value === "") display = "—";
+            else if (typeof value === "number") display = value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            else display = String(value);
+            rows += `<div class="detail-row"><span class="detail-key">${label}</span><span class="detail-val">${display}</span></div>`;
+        }
+
+        panel.innerHTML = `<div class="detail-panel">
+            <div class="detail-header">${title}</div>
+            <div class="detail-rows">${rows}</div>
+        </div>`;
+    }
+
+    function initClickToDetail() {
+        felt.onPointerClick({
+            handler: (e) => {
+                const panel = document.getElementById("detail-panel");
+                if (!e.features?.length) { panel.innerHTML = ""; return; }
+
+                const feature = e.features[0];
+                const layerForFeature = allLayers.find(l => l.id === (feature.layerId || activeLayerId));
+                renderDetailPanel("detail-panel", feature.properties, {
+                    title: layerForFeature?.name || "Feature Details"
+                });
+            }
+        });
+    }
+
+    // ── Block: fit-to-data ──
+
+    function initFitToData() {
+        const btn = document.getElementById("fit-btn");
+        btn.addEventListener("click", async () => {
+            try {
+                const layers = await felt.getLayers();
+                const layer = layers.find(l => l.id === activeLayerId);
+                if (layer?.bounds) {
+                    await felt.fitViewportToBounds({
+                        west: layer.bounds.west ?? layer.bounds[0],
+                        south: layer.bounds.south ?? layer.bounds[1],
+                        east: layer.bounds.east ?? layer.bounds[2],
+                        north: layer.bounds.north ?? layer.bounds[3],
+                    });
+                }
+            } catch (e) {
+                console.warn("Fit to data failed:", e);
+            }
+        });
+    }
+
+    // ── Init ──
+
+    async function init() {
+        initThemeToggle();
+
+        felt = await Felt.embed(document.getElementById('map'), CONFIG.mapId, {
+            uiControls: { showLegend: false, cooperativeGestures: false }
+        });
+
+        const details = await felt.getMapDetails();
+        const title = CONFIG.title || details.title || 'Dashboard';
+        document.getElementById('title').textContent = title;
+        document.title = title;
+
+        allLayers = await felt.getLayers();
+
+        // Use a fixed list of data layers (Power Plants primary, GHG secondary).
+        const dataLayers = DATA_LAYER_IDS.map(id => allLayers.find(l => l.id === id)).filter(Boolean);
+
+        if (dataLayers.length === 0) {
+            document.getElementById('content').innerHTML = '<div class="empty-state">No data layers found on this map.</div>';
+            return;
+        }
+
+        // Layer picker for the 2 data layers
+        if (dataLayers.length > 1) {
+            const selectorEl = document.getElementById('layer-selector');
+            const selectEl = document.getElementById('layer-select');
+            selectorEl.style.display = '';
+            selectEl.innerHTML = dataLayers.map(l =>
+                `<option value="${l.id}">${l.name || 'Untitled Layer'}</option>`
+            ).join('');
+            selectEl.addEventListener('change', () => activateLayer(selectEl.value));
+            document.getElementById('subtitle').textContent = `${dataLayers.length} data layers, ${allLayers.length} total`;
+        }
+
+        // Derive accent from primary layer's paint
+        const firstLayer = dataLayers[0];
+        const firstPaintColors = normalizePaintColors(firstLayer.style?.paint?.color);
+        const accentHex = firstPaintColors[Math.floor(firstPaintColors.length / 2)] || null;
+
+        const isDark = CONFIG.theme === 'dark';
+        deriveTheme(accentHex || '#6366f1', isDark);
+        document.getElementById('icon-sun').style.display = isDark ? 'block' : 'none';
+        document.getElementById('icon-moon').style.display = isDark ? 'none' : 'block';
+
+        // One-time blocks
+        await initNestedLegend("legend-tree");
+        await loadLegend("legend-container");
+        initClickToDetail();
+        initFitToData();
+
+        await activateLayer(firstLayer.id);
+    }
+
+    async function activateLayer(layerId) {
+        activeLayerId = layerId;
+        const layer = allLayers.find(l => l.id === layerId);
+        const FALLBACK_COLORS = ["#f7e76e","#f4c94f","#efa835","#e88321","#de581a","#ce141f"];
+        const layerPaintColors = normalizePaintColors(layer?.style?.paint?.color);
+        currentPaintColors = layerPaintColors.length > 0 ? layerPaintColors : FALLBACK_COLORS;
+
+        // Clear filters on ALL data layers when switching active layer
+        for (const id of DATA_LAYER_IDS) {
+            try { await felt.setLayerFilters({ layerId: id, filters: null }); } catch (e) {}
+        }
+
+        const schema = await felt.getLayerSchema(layerId);
+        nameMap = {};
+        schema.attributes.forEach(a => { nameMap[a.id] = a.displayName; });
+
+        const classified = classifyAttrs(schema);
+
+        // Feature count badge
+        const countBadge = document.getElementById('feature-count');
+        const countLabel = document.getElementById('count-label');
+        countBadge.style.display = '';
+        countLabel.textContent = `${schema.featureCount.toLocaleString()} features`;
+
+        // Derive map's categorical color map (for bar-chart color matching)
+        currentMapStyledAttr = layer?.style?.config?.categoricalAttribute || null;
+        const cfgCategories = layer?.style?.config?.categories;
+        currentMapCatColorMap = {};
+        if (currentMapStyledAttr && currentPaintColors.length > 0) {
+            if (Array.isArray(cfgCategories)) {
+                cfgCategories.forEach((cat, i) => {
+                    if (currentPaintColors[i]) currentMapCatColorMap[cat] = currentPaintColors[i];
+                });
+            } else {
+                try {
+                    const items = await felt.getLegendItems({ layerIds: [layerId] });
+                    items.forEach((item, i) => {
+                        if (item.label && currentPaintColors[i]) {
+                            currentMapCatColorMap[item.label] = currentPaintColors[i];
+                        }
+                    });
+                } catch (e) { console.warn("getLegendItems failed:", e); }
+            }
+        }
+
+        // Stat cards (numeric attrs)
+        await loadStatCards(layerId, { numericAttrs: classified.numeric });
+
+        // Pick the first text attr with low cardinality for bar-chart (skip name/id/url-like text fields)
+        // For Power Plants: primary_fuel (15 vals — under 30 cap), country (167 — too many)
+        // For GHG: emissions_category (5 vals), STATE (54 — too many)
+        const barCandidates = classified.text.filter(a => {
+            const lower = a.id.toLowerCase();
+            return !lower.includes("name") && !lower.includes("url") && !lower.includes("address")
+                && !lower.endsWith("_id") && !lower.endsWith("idnr") && !lower.includes("source")
+                && !lower.includes("note") && !lower.includes("owner") && !lower.includes("companies")
+                && !lower.includes("subparts") && !lower.includes("zip");
+        });
+
+        if (barCandidates.length > 0) {
+            initAttributePicker("bar-attr-select", barCandidates, async (attrId) => {
+                await loadBarChart(layerId, {
+                    attrId,
+                    mapCatColorMap: currentMapCatColorMap,
+                    mapStyledAttr: currentMapStyledAttr
+                });
+            });
+            // Prefer the layer's styled attribute if it's in the list
+            const initialBarAttr = (currentMapStyledAttr && barCandidates.find(a => a.id === currentMapStyledAttr))
+                ? currentMapStyledAttr
+                : barCandidates[0].id;
+            const barSelect = document.getElementById("bar-attr-select");
+            if (barSelect) barSelect.value = initialBarAttr;
+            await loadBarChart(layerId, {
+                attrId: initialBarAttr,
+                mapCatColorMap: currentMapCatColorMap,
+                mapStyledAttr: currentMapStyledAttr
+            });
+        } else {
+            document.getElementById("bar-section").style.display = "none";
+        }
+
+        // Histogram (numeric attrs) — skip year-like fields and ID fields
+        const histCandidates = classified.numeric.filter(a => {
+            const lower = a.id.toLowerCase();
+            return !lower.endsWith("_id") && !lower.includes("idnr")
+                && !lower.includes("zip") && !lower.includes("year");
+        });
+
+        if (histCandidates.length > 0) {
+            initAttributePicker("hist-attr-select", histCandidates, async (attrId) => {
+                await loadHistogram(layerId, {
+                    attrId,
+                    paintColors: currentPaintColors,
+                    mapStyledAttr: currentMapStyledAttr
+                });
+            });
+            const initialHistAttr = histCandidates[0].id;
+            const histSelect = document.getElementById("hist-attr-select");
+            if (histSelect) histSelect.value = initialHistAttr;
+            await loadHistogram(layerId, {
+                attrId: initialHistAttr,
+                paintColors: currentPaintColors,
+                mapStyledAttr: currentMapStyledAttr
+            });
+        } else {
+            document.getElementById("hist-section").style.display = "none";
+        }
+    }
+
+    init().catch(err => {
+        console.error("SDK failed:", err);
+        document.getElementById("map").innerHTML =
+            `<p style="padding:40px;color:#6b7280;">Could not load. <a href="https://felt.com/map/C1Gk6j8VSfyuqiphAw5A3D" target="_blank">View on Felt</a></p>`;
+    });
+</script>
+</body>
+</html>
