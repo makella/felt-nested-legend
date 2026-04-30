@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nested legend without a config file</title>
+    <title>Nested Legend Test v2</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -153,8 +153,18 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
+        @media (max-width: 768px) {
+            .pane { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-width: 100%; height: 50vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+            #map { bottom: 50vh; }
+        }
+
         /* ── stat-cards ── */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
         .stat-card {
             padding: 12px;
             border-radius: var(--radius-md);
@@ -165,41 +175,32 @@
         .stat-card:hover { background: var(--card-hover); }
         .stat-card.skeleton { min-height: 68px; }
         .stat-value {
-            font-size: 18px; font-weight: 600; color: var(--text); line-height: 1.25;
-            font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.25;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.01em;
         }
         .stat-label {
-            font-size: 11px; font-weight: 500; color: var(--text-muted);
-            margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
-
-        /* ── attribute-picker ── */
-        .section-select {
-            padding: 3px 22px 3px 8px;
-            font: 500 11px/1.4 'Inter', sans-serif;
-            color: var(--text-secondary);
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            appearance: none;
-            cursor: pointer;
-            max-width: 50%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='%238892A5' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 6px center;
-            transition: border-color 0.12s;
-        }
-        .section-select:focus { outline: none; border-color: var(--accent); }
 
         /* ── bar-chart ── */
         .bar-chart { display: flex; flex-direction: column; gap: 6px; }
         .bar-row {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 12px; cursor: pointer;
-            border-radius: var(--radius-sm); padding: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            padding: 2px 0;
             transition: background 0.1s;
         }
         .bar-row:hover { background: var(--card-hover); }
@@ -207,31 +208,59 @@
         .bar-row.locked .bar-fill { box-shadow: inset 0 0 0 2px var(--accent); }
         .bar-row.locked .bar-label { color: var(--text); font-weight: 600; }
         .bar-label {
-            min-width: 80px; max-width: 100px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            color: var(--text-secondary); font-weight: 500;
+            min-width: 80px;
+            max-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
-        .bar-track { flex: 1; height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .bar-track {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
         .bar-value {
-            min-width: 40px; text-align: right;
-            color: var(--text-muted); font-size: 11px; font-weight: 600;
+            min-width: 40px;
+            text-align: right;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
             font-variant-numeric: tabular-nums;
         }
 
         /* ── histogram ── */
         .histogram-wrap { position: relative; }
-        .histogram { display: flex; gap: 2px; align-items: flex-end; height: 64px; }
+        .histogram {
+            display: flex;
+            gap: 2px;
+            align-items: flex-end;
+            height: 64px;
+        }
         .hist-bar {
-            flex: 1; border-radius: 2px 2px 0 0;
-            cursor: pointer; opacity: 0.7; transition: opacity 0.12s;
+            flex: 1;
+            border-radius: 2px 2px 0 0;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.12s;
         }
         .hist-bar:hover { opacity: 1; }
         .hist-bar.locked { opacity: 1; box-shadow: inset 0 0 0 2px var(--accent); }
         .hist-labels {
-            display: flex; justify-content: space-between;
-            margin-top: 4px; font-size: 11px;
-            color: var(--text-muted); font-variant-numeric: tabular-nums;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
         }
         .hist-tooltip {
             position: absolute; top: -6px; left: 50%;
@@ -254,104 +283,208 @@
         }
         .hist-filter-hint.visible { opacity: 1; }
 
+        /* ── attribute-picker ── */
+        .section-select {
+            padding: 3px 22px 3px 8px;
+            font: 500 11px/1.4 'Inter', sans-serif;
+            color: var(--text-secondary);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            appearance: none;
+            cursor: pointer;
+            max-width: 50%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='%238892A5' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            transition: border-color 0.12s;
+        }
+        .section-select:focus { outline: none; border-color: var(--accent); }
+
         /* ── nested-legend ── */
         .legend-tree { display: flex; flex-direction: column; gap: 1px; }
-        .legend-item { display: flex; flex-direction: column; }
+
+        .legend-item { display: flex; flex-direction: column; transition: opacity 0.15s; }
+        .legend-item.hidden { opacity: 0.5; }
+
         .legend-item-header {
-            display: flex; align-items: center; gap: 8px;
-            cursor: pointer; padding: 4px 6px;
-            border-radius: var(--radius-sm); user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: var(--radius-sm);
+            user-select: none;
             transition: background 0.1s;
         }
         .legend-item-header:hover { background: var(--card-hover); }
+
         .legend-item-header input[type="checkbox"] {
-            accent-color: var(--accent); cursor: pointer;
+            accent-color: var(--accent);
+            cursor: pointer;
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
         }
+
         .legend-group-label {
-            font-size: 12px; font-weight: 600;
-            color: var(--text); letter-spacing: -0.005em;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.005em;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .legend-layer-label {
-            font-size: 12px; font-weight: 500;
+            font-size: 12px;
+            font-weight: 500;
             color: var(--text-secondary);
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .legend-label--off {
-            color: var(--text-muted);
-            text-decoration: line-through;
-            text-decoration-color: var(--text-muted);
-        }
+
         .legend-children {
             padding-left: 20px;
             border-left: 1px solid var(--border);
             margin-left: 9px;
             margin-top: 1px;
         }
+
         .legend-leaf-swatch {
-            width: 10px; height: 10px;
-            border-radius: 2px; flex-shrink: 0;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
         }
+        .legend-leaf-swatch svg { display: block; }
 
         /* ── swatch legend (color decoder) ── */
-        .legend-section { margin-bottom: 12px; }
-        .legend-section-title {
-            font-size: 11px; font-weight: 600; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.04em;
+        .legend-section { padding: 8px 0; border-top: 1px solid var(--border); }
+        .legend-section:first-child { padding-top: 0; border-top: 0; }
+        .legend-section:last-child { padding-bottom: 0; }
+
+        .legend-section-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
             margin-bottom: 6px;
+            letter-spacing: -0.005em;
         }
-        .legend-row { display: flex; flex-wrap: wrap; gap: 8px; }
-        .legend-row .legend-item {
-            display: flex; flex-direction: row; align-items: center; gap: 5px;
-            cursor: pointer; padding: 2px 4px;
-            border-radius: var(--radius-sm); transition: opacity 0.15s;
+
+        .legend-row { display: flex; flex-direction: column; gap: 1px; }
+
+        .legend-section .legend-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 3px 4px;
+            border-radius: var(--radius-sm);
+            transition: opacity 0.15s, background 0.1s;
+            min-width: 0;
         }
-        .legend-row .legend-item:hover { background: var(--card-hover); }
-        .legend-row .legend-item.hidden { opacity: 0.35; }
-        .legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
-        .legend-row .legend-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+        .legend-section .legend-item:hover { background: var(--card-hover); }
+
+        .legend-swatch {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .legend-swatch svg { display: block; }
+
+        .legend-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .legend-show-more {
+            margin-top: 2px;
+            padding: 4px 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .legend-show-more:hover { background: var(--card-hover); color: var(--text-secondary); }
+        .legend-show-more .chevron { transition: transform 0.15s; }
+        .legend-show-more[data-expanded="true"] .chevron { transform: rotate(180deg); }
+
+        .legend-gradient-bar {
+            height: 16px;
+            border-radius: 4px;
+            margin: 4px 0 4px;
+        }
+        .legend-gradient-axis {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
 
         /* ── detail-panel ── */
         .detail-panel {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            overflow: hidden; margin-top: 8px;
+            overflow: hidden;
+            margin-top: 8px;
             animation: fadeIn 0.15s ease;
         }
         .detail-header {
             padding: 10px 12px;
             background: var(--accent-dim);
             border-bottom: 1px solid var(--border);
-            font-size: 12px; font-weight: 600; color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
         }
-        .detail-rows { padding: 2px 0; }
+        .detail-rows { padding: 2px 0; max-height: 320px; overflow-y: auto; }
         .detail-row {
-            display: flex; justify-content: space-between;
-            padding: 7px 12px; font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 12px;
+            font-size: 12px;
             border-bottom: 1px solid var(--border);
             gap: 12px;
         }
         .detail-row:last-child { border-bottom: none; }
-        .detail-key { color: var(--text-muted); font-weight: 500; flex-shrink: 0; }
+        .detail-key { color: var(--text-muted); font-weight: 500; }
         .detail-val {
-            color: var(--text); font-weight: 600;
+            color: var(--text);
+            font-weight: 600;
             font-variant-numeric: tabular-nums;
-            text-align: right; word-break: break-word;
-        }
-
-        /* ── fit-to-data button ── */
-        .control-btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 10px; font-size: 11px; font-weight: 600;
-            color: var(--text-secondary); background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm); cursor: pointer;
-            transition: background 0.12s, border-color 0.12s, color 0.12s;
-        }
-        .control-btn:hover { background: var(--card-hover); color: var(--text); border-color: var(--border-strong); }
-
-        @media (max-width: 768px) {
-            .pane { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-width: 100%; height: 50vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-            #map { bottom: 50vh; }
+            text-align: right;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 60%;
         }
     </style>
 </head>
@@ -417,20 +550,15 @@
                 <div class="hist-filter-hint" id="hist-filter-hint">Filtering map to this range</div>
             </div>
 
-            <!-- Fit to data -->
-            <div class="section">
-                <button class="control-btn" id="fit-btn" title="Fit to data">Fit to Data</button>
-            </div>
-
-            <!-- Nested legend (folder tree of all 11 layers) -->
+            <!-- Nested legend (visibility tree) -->
             <div class="section" id="nested-legend-section">
                 <div class="section-title">Layers</div>
                 <div class="legend-tree" id="legend-tree"></div>
             </div>
 
-            <!-- Swatch legend (color decoder for active layer) -->
+            <!-- Swatch legend (color decoder) -->
             <div class="section" id="legend-section">
-                <div class="section-title">Legend</div>
+                <div class="section-title">Color key</div>
                 <div id="legend-container"></div>
             </div>
 
@@ -446,14 +574,14 @@
     const CONFIG = {
         mapId: "C1Gk6j8VSfyuqiphAw5A3D",
         feltApiToken: null,
-        theme: "light",   // basemap = "default" -> light theme
+        theme: "light",
         title: null,
     };
 
-    // Power Plants is primary (richest schema). GHG Emissions is secondary.
+    // Data layers — fixed order so layer-picker & filter-clearing work consistently.
     const DATA_LAYER_IDS = [
-        "dsG4ahnVQ9AO45tWNMfxJQC",   // Industrial / Global Power Plant Database (primary)
-        "efruuFGiTFqIRvJ3WT82pC",    // Industrial / Large Facility Greenhouse Gas Emissions (secondary)
+        "dsG4ahnVQ9AO45tWNMfxJQC", // Industrial/Global Power Plant Database (primary)
+        "efruuFGiTFqIRvJ3WT82pC"   // Industrial/Large Facility Greenhouse Gas Emissions (secondary)
     ];
 
     let felt, allLayers, activeLayerId, nameMap = {};
@@ -483,6 +611,18 @@
         if (Array.isArray(paintColor)) return paintColor.map(colorToHex).filter(Boolean);
         const single = colorToHex(paintColor);
         return single ? [single] : [];
+    }
+
+    // Geometry-aware swatch SVG: circle for points, stroke for lines, rounded square for polygons.
+    function legendSwatch(color, geomType) {
+        const t = (geomType || "").toLowerCase();
+        if (t.includes("point")) {
+            return `<svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="${color}"/></svg>`;
+        }
+        if (t.includes("line")) {
+            return `<svg width="14" height="14" viewBox="0 0 14 14"><line x1="2" y1="7" x2="12" y2="7" stroke="${color}" stroke-width="3" stroke-linecap="round"/></svg>`;
+        }
+        return `<svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="2" fill="${color}"/></svg>`;
     }
 
     function hexToHSL(hex) {
@@ -620,10 +760,9 @@
     }
 
     // ── Block: stat-cards ──
-
-    async function loadStatCards(layerId, options = {}) {
-        const el = document.getElementById("stats");
-        const { numericAttrs = [] } = options;
+    async function loadStatCards(layerId, numericAttrs) {
+        const el = document.getElementById('stats');
+        el.innerHTML = '<div class="stat-card skeleton"></div><div class="stat-card skeleton"></div><div class="stat-card skeleton"></div><div class="stat-card skeleton"></div>';
 
         try {
             const calls = [
@@ -656,30 +795,29 @@
                     <div class="stat-label">${s.label}</div>
                 </div>`
             ).join("");
-
-            return countResult.count;
         } catch (e) {
-            el.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Could not load statistics</div>`;
-            return null;
+            console.warn("stat-cards failed:", e);
+            el.innerHTML = `<div class="stat-card" style="grid-column:1/-1;">Could not load statistics</div>`;
         }
     }
 
-    // ── Block: bar-chart ──
+    // ── Block: bar-chart (with hover-to-filter + click-to-lock) ──
+    async function loadBarChart(layerId, attrId) {
+        const section = document.getElementById('bar-section');
+        const el = document.getElementById('bar-chart');
 
-    async function loadBarChart(layerId, options = {}) {
-        const { attrId, mapCatColorMap = {}, mapStyledAttr = null } = options;
-        const section = document.getElementById("bar-section");
-        const el = document.getElementById("bar-chart");
+        if (!attrId) { section.style.display = "none"; return; }
 
-        if (!attrId) { section.style.display = "none"; return false; }
+        // Reset any stale lock from a previous attribute
+        await felt.setLayerFilters({ layerId, filters: null });
 
-        const useMapColors = (attrId === mapStyledAttr) && Object.keys(mapCatColorMap).length > 0;
+        const useMapColors = (attrId === currentMapStyledAttr) && Object.keys(currentMapCatColorMap).length > 0;
 
         try {
             const data = await felt.getCategoryData({ layerId, attribute: attrId });
-            if (!data || data.length === 0) { section.style.display = "none"; return false; }
-            const maxVal = Math.max(...data.map(c => c.value));
-            if (data.length > 30 || maxVal <= 1) { section.style.display = "none"; return false; }
+            if (!data || data.length === 0) { section.style.display = "none"; return; }
+            const maxValAll = Math.max(...data.map(c => c.value));
+            if (data.length > 30 || maxValAll <= 1) { section.style.display = "none"; return; }
 
             section.style.display = "";
             const displayName = nameMap[attrId] || attrId;
@@ -692,7 +830,7 @@
             el.innerHTML = sliced.map(cat => {
                 const pct = (cat.value / max) * 100;
                 const color = useMapColors
-                    ? (mapCatColorMap[cat.key] || "var(--text-muted)")
+                    ? (currentMapCatColorMap[cat.key] || "var(--text-muted)")
                     : "var(--accent)";
                 const opacity = useMapColors ? 1 : (0.45 + (pct / 180));
                 const safeKey = (cat.key || "").replace(/"/g, "&quot;");
@@ -734,26 +872,23 @@
                     }
                 });
             });
-
-            return true;
         } catch (e) {
             console.warn("Bar chart failed:", e);
             section.style.display = "none";
-            return false;
         }
     }
 
-    // ── Block: histogram ──
-
-    async function loadHistogram(layerId, options = {}) {
-        const { attrId, paintColors = null, mapStyledAttr = null } = options;
-        const el = document.getElementById("histogram");
-        const section = document.getElementById("hist-section");
-        const labelsEl = document.getElementById("hist-labels");
+    // ── Block: histogram (with hover-to-filter + click-to-lock) ──
+    async function loadHistogram(layerId, attrId) {
+        const el = document.getElementById('histogram');
+        const section = document.getElementById('hist-section');
+        const labelsEl = document.getElementById('hist-labels');
 
         if (!attrId) { section.style.display = "none"; return; }
 
-        const useMapColors = (attrId === mapStyledAttr) && paintColors?.length >= 2;
+        await felt.setLayerFilters({ layerId, filters: null });
+
+        const useMapColors = (attrId === currentMapStyledAttr) && currentPaintColors?.length >= 2;
 
         try {
             const bins = await felt.getHistogramData({
@@ -772,7 +907,7 @@
             el.innerHTML = bins.map((bin, i) => {
                 const pct = max > 0 ? (bin.value / max) * 100 : 0;
                 const t = bins.length > 1 ? i / (bins.length - 1) : 0;
-                const color = useMapColors ? lerpColor(paintColors, t) : "var(--accent)";
+                const color = useMapColors ? lerpColor(currentPaintColors, t) : "var(--accent)";
                 return `<div class="hist-bar" data-min="${bin.min}" data-max="${bin.max}" style="height:${Math.max(pct, 2)}%;background:${color};" title="${bin.min.toFixed(1)} – ${bin.max.toFixed(1)}: ${bin.value.toLocaleString()}"></div>`;
             }).join("");
 
@@ -845,18 +980,22 @@
     }
 
     // ── Block: attribute-picker ──
-
-    function initAttributePicker(selectId, attributes, onAttrChange) {
+    function initAttributePicker(selectId, attributes, currentAttrId, onAttrChange) {
         const select = document.getElementById(selectId);
         if (!select) return;
+        if (!attributes || attributes.length === 0) {
+            select.innerHTML = "";
+            select.style.display = "none";
+            return;
+        }
+        select.style.display = "";
         select.innerHTML = attributes.map(a =>
-            `<option value="${a.id}">${a.displayName}</option>`
+            `<option value="${a.id}"${a.id === currentAttrId ? " selected" : ""}>${a.displayName}</option>`
         ).join("");
         select.onchange = () => onAttrChange(select.value);
     }
 
-    // ── Block: nested-legend ──
-
+    // ── Block: nested-legend (opacity-fade hidden state, geometry-aware leaf swatches) ──
     async function initNestedLegend(containerId) {
         const container = document.getElementById(containerId);
         const layers = await felt.getLayers();
@@ -872,13 +1011,15 @@
                     const isLeaf = i === parts.length - 1;
                     if (isLeaf) {
                         visibilityState[layer.id] = layer.visible !== false;
+                        const colors = normalizePaintColors(layer.style?.paint?.color);
                         node.children.push({
                             label: part,
                             layerId: layer.id,
-                            swatch: (() => {
-                                const colors = normalizePaintColors(layer.style?.paint?.color);
-                                return colors.length === 1 ? colors[0] : null;
-                            })()
+                            // Single accent color → render swatch via the geometry-aware helper.
+                            // Categorical/multi-color layers don't get a leaf swatch (the swatch `legend` block
+                            // handles those — the indent + label is enough here).
+                            swatchColor: colors.length === 1 ? colors[0] : null,
+                            geomType: layer.geometry_type
                         });
                     } else {
                         let group = node.children.find(c => c.children && c.label === part);
@@ -915,6 +1056,8 @@
         function buildItem(item, depth) {
             const itemEl = document.createElement("div");
             itemEl.className = `legend-item depth-${depth}`;
+            // Apply opacity-fade when nothing under this node is visible — universal "off" signal
+            if (!someVisible(item)) itemEl.classList.add("hidden");
 
             const header = document.createElement("div");
             header.className = "legend-item-header";
@@ -930,17 +1073,16 @@
 
             header.appendChild(checkbox);
 
-            if (item.swatch) {
-                const swatch = document.createElement("div");
+            // Geometry-aware swatch for leaf layers with a single styled color
+            if (item.swatchColor) {
+                const swatch = document.createElement("span");
                 swatch.className = "legend-leaf-swatch";
-                swatch.style.background = item.swatch;
+                swatch.innerHTML = legendSwatch(item.swatchColor, item.geomType);
                 header.appendChild(swatch);
             }
 
             const label = document.createElement("span");
-            const baseClass = item.children ? "legend-group-label" : "legend-layer-label";
-            const onClass = someVisible(item) ? "" : "legend-label--off";
-            label.className = `${baseClass} ${onClass}`;
+            label.className = item.children ? "legend-group-label" : "legend-layer-label";
             label.textContent = item.label;
             label.addEventListener("click", onToggle);
 
@@ -968,53 +1110,74 @@
         redraw();
     }
 
-    // ── Block: swatch legend (color decoder) ──
+    // ── Block: legend (color decoder — categorical/gradient only; nested-legend covers single-color leafs) ──
+    const SHOW_MORE_THRESHOLD = 8;
 
     async function loadLegend(containerId) {
         const container = document.getElementById(containerId);
         const layers = await felt.getLayers();
-        const visibleLayers = layers.filter(l => l.visible !== false && l.style?.paint?.color);
+        // Only render decoders for layers that need explanation: categorical (multi-color) or gradient.
+        // Single-color leafs are already shown with swatches in the nested-legend tree.
+        const needsDecoder = (l) => {
+            if (l.visible === false) return false;
+            const colors = normalizePaintColors(l.style?.paint?.color);
+            const isGradient = l.style?.type === "numeric" || (l.style?.config?.numericAttribute && colors.length >= 2);
+            const isCategorical = l.style?.type === "categorical" || (l.style?.config?.categoricalAttribute && colors.length >= 2);
+            return isGradient || isCategorical;
+        };
+        const visibleLayers = layers.filter(needsDecoder);
 
         if (visibleLayers.length === 0) {
-            container.innerHTML = '<div class="legend-label">No styled layers</div>';
+            container.innerHTML = '<div class="legend-label" style="padding:0 4px">All layers use single-color symbology — see Layers panel above.</div>';
             return;
         }
 
         let allLegendItems = [];
         try { allLegendItems = await felt.getLegendItems(); } catch (e) {}
 
-        // Show legends only for layers with categorical/multi-color styling — single-color layers
-        // already have their swatch in the nested-legend tree, so this avoids duplication.
-        const richLayers = visibleLayers.filter(vl => {
-            const colors = normalizePaintColors(vl.style?.paint?.color);
-            return colors.length >= 2;
-        });
-
-        if (richLayers.length === 0) {
-            document.getElementById("legend-section").style.display = "none";
-            return;
-        }
-        document.getElementById("legend-section").style.display = "";
-
-        container.innerHTML = richLayers.map(vl => {
+        container.innerHTML = visibleLayers.map(vl => {
             const colors = normalizePaintColors(vl.style?.paint?.color);
             const labels = vl.style?.legend?.displayName || {};
             const cfgCategories = vl.style?.config?.categories;
             const categoriesArr = Array.isArray(cfgCategories) ? cfgCategories : [];
             const title = vl.name || vl.style?.config?.categoricalAttribute || vl.style?.config?.numericAttribute || "Legend";
+            const isGradient = vl.style?.type === "numeric" || (vl.style?.config?.numericAttribute && colors.length >= 2);
             const layerLegendItems = allLegendItems.filter(li => li.layerId === vl.id);
 
+            if (isGradient && colors.length >= 2) {
+                const stops = colors.map((c, i) => `${c} ${(i / (colors.length - 1)) * 100}%`).join(", ");
+                const min = vl.style?.config?.min ?? "min";
+                const max = vl.style?.config?.max ?? "max";
+                return `<div class="legend-section">
+                    <div class="legend-section-header">${title}</div>
+                    <div class="legend-gradient-bar" style="background: linear-gradient(to right, ${stops});"></div>
+                    <div class="legend-gradient-axis"><span>${min}</span><span>${max}</span></div>
+                </div>`;
+            }
+
+            const items = colors.map((c, i) => {
+                const label = labels[String(i)] || categoriesArr[i] || layerLegendItems[i]?.label || "";
+                const legendItemId = layerLegendItems[i]?.id || "";
+                return { color: c, label, legendItemId };
+            });
+
+            const visible = items.slice(0, SHOW_MORE_THRESHOLD);
+            const hidden = items.slice(SHOW_MORE_THRESHOLD);
+
+            const renderItem = (it) => `<div class="legend-item" data-layer-id="${vl.id}" data-legend-id="${it.legendItemId}">
+                <div class="legend-swatch">${legendSwatch(it.color, vl.geometry_type)}</div>
+                <div class="legend-label" title="${it.label}">${it.label}</div>
+            </div>`;
+
             return `<div class="legend-section">
-                <div class="legend-section-title">${title}</div>
-                <div class="legend-row">
-                    ${colors.map((c, i) => {
-                        const label = labels[String(i)] || categoriesArr[i] || layerLegendItems[i]?.label || "";
-                        const legendItemId = layerLegendItems[i]?.id || "";
-                        return `<div class="legend-item" data-layer-id="${vl.id}" data-legend-id="${legendItemId}">
-                            <div class="legend-swatch" style="background:${c}"></div>
-                            <div class="legend-label">${label}</div>
-                        </div>`;
-                    }).join("")}
+                <div class="legend-section-header">${title}</div>
+                <div class="legend-row" data-layer-id="${vl.id}">
+                    ${visible.map(renderItem).join("")}
+                    ${hidden.length > 0 ? `<div class="legend-row-hidden" hidden>${hidden.map(renderItem).join("")}</div>` : ""}
+                    ${hidden.length > 0 ? `<button class="legend-show-more" data-expanded="false" data-layer="${vl.id}">
+                        <span class="show-text">Show ${hidden.length} more</span>
+                        <svg class="chevron" width="10" height="10" viewBox="0 0 10 10"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>` : ""}
                 </div>
             </div>`;
         }).join("");
@@ -1024,7 +1187,6 @@
                 const legendId = item.dataset.legendId;
                 const layerIdVal = item.dataset.layerId;
                 if (!legendId) return;
-
                 const isHidden = item.classList.toggle("hidden");
                 const payload = isHidden
                     ? { hide: [{ layerId: layerIdVal, id: legendId }] }
@@ -1032,12 +1194,25 @@
                 try { await felt.setLegendItemVisibility(payload); } catch (e) { console.warn("Toggle failed:", e); }
             });
         });
+
+        container.querySelectorAll(".legend-show-more").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const expanded = btn.dataset.expanded === "true";
+                const next = !expanded;
+                btn.dataset.expanded = String(next);
+                const hiddenWrap = btn.previousElementSibling;
+                if (hiddenWrap?.classList.contains("legend-row-hidden")) {
+                    hiddenWrap.hidden = !next;
+                }
+                const count = btn.querySelector(".show-text");
+                if (count) count.textContent = next ? "Show fewer" : count.textContent.replace(/^Show fewer$/, count.dataset.original || "Show more");
+            });
+        });
     }
 
     // ── Block: detail-panel + click-to-detail ──
-
     function renderDetailPanel(containerId, properties, options = {}) {
-        const { title = "Feature Details" } = options;
+        const { nameMap = {}, title = "Feature Details" } = options;
         const panel = document.getElementById(containerId);
 
         let rows = "";
@@ -1047,7 +1222,7 @@
             if (value == null || value === "") display = "—";
             else if (typeof value === "number") display = value.toLocaleString(undefined, { maximumFractionDigits: 2 });
             else display = String(value);
-            rows += `<div class="detail-row"><span class="detail-key">${label}</span><span class="detail-val">${display}</span></div>`;
+            rows += `<div class="detail-row"><span class="detail-key">${label}</span><span class="detail-val" title="${display}">${display}</span></div>`;
         }
 
         panel.innerHTML = `<div class="detail-panel">
@@ -1064,31 +1239,30 @@
 
                 const feature = e.features[0];
                 const layerForFeature = allLayers.find(l => l.id === (feature.layerId || activeLayerId));
+
+                // Build a per-click nameMap (feature may be from a layer other than the active one).
+                let perClickNameMap = nameMap;
+                if (layerForFeature && feature.layerId && feature.layerId !== activeLayerId) {
+                    perClickNameMap = {};
+                    felt.getLayerSchema(feature.layerId).then(schema => {
+                        schema.attributes.forEach(a => { perClickNameMap[a.id] = a.displayName; });
+                        renderDetailPanel("detail-panel", feature.properties, {
+                            nameMap: perClickNameMap,
+                            title: layerForFeature?.name || "Feature Details"
+                        });
+                    }).catch(() => {
+                        renderDetailPanel("detail-panel", feature.properties, {
+                            nameMap: perClickNameMap,
+                            title: layerForFeature?.name || "Feature Details"
+                        });
+                    });
+                    return;
+                }
+
                 renderDetailPanel("detail-panel", feature.properties, {
+                    nameMap: perClickNameMap,
                     title: layerForFeature?.name || "Feature Details"
                 });
-            }
-        });
-    }
-
-    // ── Block: fit-to-data ──
-
-    function initFitToData() {
-        const btn = document.getElementById("fit-btn");
-        btn.addEventListener("click", async () => {
-            try {
-                const layers = await felt.getLayers();
-                const layer = layers.find(l => l.id === activeLayerId);
-                if (layer?.bounds) {
-                    await felt.fitViewportToBounds({
-                        west: layer.bounds.west ?? layer.bounds[0],
-                        south: layer.bounds.south ?? layer.bounds[1],
-                        east: layer.bounds.east ?? layer.bounds[2],
-                        north: layer.bounds.north ?? layer.bounds[3],
-                    });
-                }
-            } catch (e) {
-                console.warn("Fit to data failed:", e);
             }
         });
     }
@@ -1109,24 +1283,32 @@
 
         allLayers = await felt.getLayers();
 
-        // Use a fixed list of data layers (Power Plants primary, GHG secondary).
-        const dataLayers = DATA_LAYER_IDS.map(id => allLayers.find(l => l.id === id)).filter(Boolean);
+        // Resolve data layers in a guaranteed order
+        const dataLayers = DATA_LAYER_IDS
+            .map(id => allLayers.find(l => l.id === id))
+            .filter(Boolean);
 
         if (dataLayers.length === 0) {
             document.getElementById('content').innerHTML = '<div class="empty-state">No data layers found on this map.</div>';
             return;
         }
 
-        // Layer picker for the 2 data layers
+        // Layer picker (2 data layers)
         if (dataLayers.length > 1) {
             const selectorEl = document.getElementById('layer-selector');
             const selectEl = document.getElementById('layer-select');
             selectorEl.style.display = '';
             selectEl.innerHTML = dataLayers.map(l =>
                 `<option value="${l.id}">${l.name || 'Untitled Layer'}</option>`
-            ).join('');
-            selectEl.addEventListener('change', () => activateLayer(selectEl.value));
-            document.getElementById('subtitle').textContent = `${dataLayers.length} data layers, ${allLayers.length} total`;
+            ).join("");
+            selectEl.addEventListener("change", async () => {
+                // Clear filters on ALL data layers before switching
+                for (const id of DATA_LAYER_IDS) {
+                    await felt.setLayerFilters({ layerId: id, filters: null });
+                }
+                await activateLayer(selectEl.value);
+            });
+            document.getElementById('subtitle').textContent = `${dataLayers.length} data layers • ${allLayers.length} layers total`;
         }
 
         // Derive accent from primary layer's paint
@@ -1139,11 +1321,12 @@
         document.getElementById('icon-sun').style.display = isDark ? 'block' : 'none';
         document.getElementById('icon-moon').style.display = isDark ? 'none' : 'block';
 
-        // One-time blocks
-        await initNestedLegend("legend-tree");
-        await loadLegend("legend-container");
+        // Build the legends ONCE (they reflect all 11 layers — independent of active layer)
+        await initNestedLegend('legend-tree');
+        await loadLegend('legend-container');
+
+        // Click-to-detail (works across all visible layers)
         initClickToDetail();
-        initFitToData();
 
         await activateLayer(firstLayer.id);
     }
@@ -1154,11 +1337,6 @@
         const FALLBACK_COLORS = ["#f7e76e","#f4c94f","#efa835","#e88321","#de581a","#ce141f"];
         const layerPaintColors = normalizePaintColors(layer?.style?.paint?.color);
         currentPaintColors = layerPaintColors.length > 0 ? layerPaintColors : FALLBACK_COLORS;
-
-        // Clear filters on ALL data layers when switching active layer
-        for (const id of DATA_LAYER_IDS) {
-            try { await felt.setLayerFilters({ layerId: id, filters: null }); } catch (e) {}
-        }
 
         const schema = await felt.getLayerSchema(layerId);
         nameMap = {};
@@ -1172,90 +1350,69 @@
         countBadge.style.display = '';
         countLabel.textContent = `${schema.featureCount.toLocaleString()} features`;
 
-        // Derive map's categorical color map (for bar-chart color matching)
+        // ── Derive map's categorical color map (for bar-chart color matching) ──
         currentMapStyledAttr = layer?.style?.config?.categoricalAttribute || null;
         const cfgCategories = layer?.style?.config?.categories;
         currentMapCatColorMap = {};
-        if (currentMapStyledAttr && currentPaintColors.length > 0) {
+
+        if (currentMapStyledAttr && layerPaintColors.length > 0) {
             if (Array.isArray(cfgCategories)) {
                 cfgCategories.forEach((cat, i) => {
-                    if (currentPaintColors[i]) currentMapCatColorMap[cat] = currentPaintColors[i];
+                    if (layerPaintColors[i]) currentMapCatColorMap[cat] = layerPaintColors[i];
                 });
             } else {
                 try {
                     const items = await felt.getLegendItems({ layerIds: [layerId] });
                     items.forEach((item, i) => {
-                        if (item.label && currentPaintColors[i]) {
-                            currentMapCatColorMap[item.label] = currentPaintColors[i];
-                        }
+                        if (item.label && layerPaintColors[i]) currentMapCatColorMap[item.label] = layerPaintColors[i];
                     });
-                } catch (e) { console.warn("getLegendItems failed:", e); }
+                } catch (e) {
+                    console.warn("getLegendItems failed; falling back to accent:", e);
+                }
             }
         }
 
-        // Stat cards (numeric attrs)
-        await loadStatCards(layerId, { numericAttrs: classified.numeric });
+        // ── Stat cards ──
+        await loadStatCards(layerId, classified.numeric);
 
-        // Pick the first text attr with low cardinality for bar-chart (skip name/id/url-like text fields)
-        // For Power Plants: primary_fuel (15 vals — under 30 cap), country (167 — too many)
-        // For GHG: emissions_category (5 vals), STATE (54 — too many)
-        const barCandidates = classified.text.filter(a => {
-            const lower = a.id.toLowerCase();
-            return !lower.includes("name") && !lower.includes("url") && !lower.includes("address")
-                && !lower.endsWith("_id") && !lower.endsWith("idnr") && !lower.includes("source")
-                && !lower.includes("note") && !lower.includes("owner") && !lower.includes("companies")
-                && !lower.includes("subparts") && !lower.includes("zip");
-        });
-
-        if (barCandidates.length > 0) {
-            initAttributePicker("bar-attr-select", barCandidates, async (attrId) => {
-                await loadBarChart(layerId, {
-                    attrId,
-                    mapCatColorMap: currentMapCatColorMap,
-                    mapStyledAttr: currentMapStyledAttr
-                });
-            });
-            // Prefer the layer's styled attribute if it's in the list
-            const initialBarAttr = (currentMapStyledAttr && barCandidates.find(a => a.id === currentMapStyledAttr))
-                ? currentMapStyledAttr
-                : barCandidates[0].id;
-            const barSelect = document.getElementById("bar-attr-select");
-            if (barSelect) barSelect.value = initialBarAttr;
-            await loadBarChart(layerId, {
-                attrId: initialBarAttr,
-                mapCatColorMap: currentMapCatColorMap,
-                mapStyledAttr: currentMapStyledAttr
-            });
+        // ── Bar chart + attribute picker (text attrs ≤12 unique would be ideal; use first text attr) ──
+        // Filter to text attrs that look like good categorical fits (skip ID-ish columns).
+        const idLikeRe = /(^|_)(id|idnr|gppd_idnr|wepp_id|ghgrp.id|zip.code|url|name)($|_)/i;
+        const barAttrs = classified.text.filter(a => !idLikeRe.test(a.id) && !idLikeRe.test(a.displayName));
+        let barAttrId = null;
+        // Prefer the styled categorical attr if present
+        if (currentMapStyledAttr && barAttrs.find(a => a.id === currentMapStyledAttr)) {
+            barAttrId = currentMapStyledAttr;
         } else {
-            document.getElementById("bar-section").style.display = "none";
+            barAttrId = barAttrs[0]?.id || null;
         }
 
-        // Histogram (numeric attrs) — skip year-like fields and ID fields
-        const histCandidates = classified.numeric.filter(a => {
-            const lower = a.id.toLowerCase();
-            return !lower.endsWith("_id") && !lower.includes("idnr")
-                && !lower.includes("zip") && !lower.includes("year");
-        });
-
-        if (histCandidates.length > 0) {
-            initAttributePicker("hist-attr-select", histCandidates, async (attrId) => {
-                await loadHistogram(layerId, {
-                    attrId,
-                    paintColors: currentPaintColors,
-                    mapStyledAttr: currentMapStyledAttr
-                });
+        if (barAttrs.length > 0) {
+            initAttributePicker('bar-attr-select', barAttrs, barAttrId, async (newAttrId) => {
+                await loadBarChart(layerId, newAttrId);
             });
-            const initialHistAttr = histCandidates[0].id;
-            const histSelect = document.getElementById("hist-attr-select");
-            if (histSelect) histSelect.value = initialHistAttr;
-            await loadHistogram(layerId, {
-                attrId: initialHistAttr,
-                paintColors: currentPaintColors,
-                mapStyledAttr: currentMapStyledAttr
-            });
+            await loadBarChart(layerId, barAttrId);
         } else {
-            document.getElementById("hist-section").style.display = "none";
+            document.getElementById('bar-section').style.display = 'none';
         }
+
+        // ── Histogram + attribute picker ──
+        // Filter out year/id-ish numerics that aren't meaningful distributions.
+        const skipNumRe = /(year|gppd|wepp|ghgrp.id|zip.code)/i;
+        const histAttrs = classified.numeric.filter(a => !skipNumRe.test(a.id) && !skipNumRe.test(a.displayName));
+        const histAttrId = histAttrs[0]?.id || null;
+
+        if (histAttrs.length > 0) {
+            initAttributePicker('hist-attr-select', histAttrs, histAttrId, async (newAttrId) => {
+                await loadHistogram(layerId, newAttrId);
+            });
+            await loadHistogram(layerId, histAttrId);
+        } else {
+            document.getElementById('hist-section').style.display = 'none';
+        }
+
+        // Clear any leftover detail panel from previous layer
+        document.getElementById('detail-panel').innerHTML = '';
     }
 
     init().catch(err => {
